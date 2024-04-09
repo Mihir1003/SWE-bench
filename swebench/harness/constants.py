@@ -536,6 +536,10 @@ KEY_INSTANCE_ID = "instance_id"
 KEY_MODEL = "model_name_or_path"
 KEY_PREDICTION = "model_patch"
 
+KEY_PRED_TEST_PATCH = "pred_test_patch"
+KEY_GOLD_PATCH = "patch"
+KEY_TEST_PATCH = "test_patch"
+
 # Constants - Logging
 APPLY_PATCH_FAIL = ">>>>> Patch Apply Failed"
 APPLY_PATCH_PASS = ">>>>> Applied Patch"

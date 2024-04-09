@@ -97,12 +97,14 @@ def main(
         assert file_source not in {
             "all",
             "oracle",
+            "test",
         }, "Cannot use max_context_len with oracle or all file sources"
         output_file += f"__k-{k}"
     if max_context_len is not None:
         assert file_source not in {
             "all",
             "oracle",
+            "test",
         }, "Cannot use max_context_len with oracle or all file sources"
         assert (
             tokenizer_name is not None
@@ -183,13 +185,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset_name_or_path",
         type=str,
-        default="princeton-nlp/SWE-bench",
+        default="princeton-nlp/SWE-bench_Lite",
         help="Dataset to use for test set from HuggingFace Datasets or path to a save_to_disk directory.",
     )
     parser.add_argument(
         "--splits",
         nargs="+",
-        default=["train", "test"],
+        default=["dev", "test"],
         help="Splits to use from the dataset.",
     )
     parser.add_argument(
@@ -209,15 +211,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prompt_style",
         type=str,
-        default="style-3",
+        default="test-style-3",
         choices=PROMPT_FUNCTIONS.keys(),
         help="Prompt style to use. See create_instance.PROMPT_FUNCTIONS for details.",
     )
     parser.add_argument(
         "--file_source",
         type=str,
-        default="oracle",
-        choices=["oracle", "bm25", "all"],
+        default="test",
+        choices=["oracle", "bm25", "all","test"],
         help="How to select the files to use in context.",
     )
     parser.add_argument(

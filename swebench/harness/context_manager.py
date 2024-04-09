@@ -453,7 +453,7 @@ logger_taskenv = logging.getLogger("taskenv_context_manager")
 
 class TaskEnvContextManager:
     def __init__(
-        self,
+        self,  
         instance: dict,
         testbed: str,
         venv: str,

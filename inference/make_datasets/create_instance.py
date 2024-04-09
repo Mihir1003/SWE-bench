@@ -256,6 +256,43 @@ def prompt_style_3(instance):
     final_text = "\n".join(final_text)
     return final_text
 
+def prompt_style_3_test(instance):
+    premise = "You will be provided with a partial code base and an issue statement explaining a problem to resolve. You must devise a test that will fail if the issue is not resolved. You will be given a test file which should be modified. You may add or modify an existing test"
+    readmes_text = make_code_text(instance["readmes"])
+    code_text = make_code_text(instance["file_contents"])
+    example_explanation = (
+        f"Here is an example of a patch file. It consists of changes to the code base. "
+        + f"It specifies the file names, the line numbers of each change, and the removed and added lines. "
+        + f"A single patch file can contain changes to multiple files."
+    )
+    final_instruction = (
+        f"I need you to make or edit a test case to recreate the provided issue by generating a single patch file that I can apply "
+        + f"directly to this repository using git apply. Please respond with a single patch "
+        + f"file in the format shown above."
+    )
+    problem_statement = instance["problem_statement"]
+    final_text = [
+        premise,
+        "<issue>",
+        problem_statement,
+        "</issue>",
+        "",
+        "<code>",
+        readmes_text,
+        code_text,
+        "</code>",
+        "",
+        example_explanation,
+        "<patch>",
+        PATCH_EXAMPLE,
+        "</patch>",
+        "",
+        final_instruction,
+        "Respond below:",
+    ]
+    final_text = "\n".join(final_text)
+    return final_text
+
 
 def full_file_gen(instance):
     premise = "You will be provided with a partial code base and an issue statement explaining a problem to resolve."
@@ -299,6 +336,7 @@ PROMPT_FUNCTIONS = {
     "style-3": prompt_style_3,
     "full_file_gen": full_file_gen,
     "style-2-edits-only": prompt_style_2_edits_only,
+    "test-style-3": prompt_style_3_test,
 }
 
 
@@ -331,6 +369,19 @@ def get_oracle_filenames(instance):
     source_files = {
         patch_file.source_file.split("a/", 1)[-1]
         for patch_file in unidiff.PatchSet(instance["patch"])
+    }
+    gold_docs = set()
+    for source_file in source_files:
+        gold_docs.add(source_file)
+    return gold_docs
+
+def get_test_filenames(instance):
+    """
+    Returns the filenames that are changed in the test patch
+    """
+    source_files = {
+        patch_file.source_file.split("a/", 1)[-1]
+        for patch_file in unidiff.PatchSet(instance["test_patch"])
     }
     gold_docs = set()
     for source_file in source_files:
@@ -386,6 +437,10 @@ def add_text_inputs(
                         base_text_inputs = PROMPT_FUNCTIONS[prompt_style](instance)
                         base_text_input_length = len(
                             tokenizer_func(base_text_inputs, tokenizer)
+                        )
+                    if file_source in {"test"}:
+                        instance["file_contents"] = ingest_files(
+                            get_test_filenames(instance)
                         )
                     if file_source in {"oracle"}:
                         instance["file_contents"] = ingest_files(
